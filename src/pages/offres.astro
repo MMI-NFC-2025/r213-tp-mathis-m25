@@ -1,18 +1,7 @@
 ---
-import '../styles/global.css'
----
-<!doctype html>
-<html lang="en">
-	<head>
-		<meta charset="UTF-8" />
-		<meta name="viewport" content="width=device-width" />
-		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-		<title>Accueil</title>
-	</head>
-	<body>
-		<h1>Page des offres</h1>
-	</body>
-</html>
+// 1. Les imports et les données se mettent TOUJOURS ici
+import '../styles/global.css';
+import OffreCard from '../components/OffreCard.astro';
 
 const offres = [
     {
@@ -48,11 +37,24 @@ const offres = [
         "surface": 80,
         "imgUrl": "image3.png"
     }
-]
+];
+---
 
-<div>
-{ ?.map((?) => 
-        // afficher les nom des maisons sous forme de liste <ul>.
-    )
-}
-</div>
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width" />
+        <title>Accueil</title>
+    </head>
+    <body>
+        <h1>Page des offres</h1>
+
+        <div>
+            {offres.map((offre) => (
+                /* On appelle ici le composant pour chaque offre */
+                <OffreCard {...offre} />
+            ))}
+        </div>
+    </body>
+</html>

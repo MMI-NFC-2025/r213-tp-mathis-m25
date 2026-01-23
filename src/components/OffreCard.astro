@@ -1,0 +1,12 @@
+---
+// Récupération des propriétés passées par le spread {...offre}
+const { nomMaison, prix, adresse, favori } = Astro.props;
+---
+
+<div class="offre" data-favori={favori.toString()}>
+    <h3>{nomMaison}</h3>
+    <ul>
+        <li>Prix : {prix}€</li>
+        <li>Adresse : {adresse}</li>
+    </ul>
+</div>

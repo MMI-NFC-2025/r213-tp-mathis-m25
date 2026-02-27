@@ -1,60 +1,57 @@
 ---
-// 1. Les imports et les données se mettent TOUJOURS ici
 import '../styles/global.css';
 import OffreCard from '../components/OffreCard.astro';
 
-const offres = [
-    {
-        "adresse": "2821 Lake Sevilla, Palm Harbor, TX",
-        "favori": true,
-        "id": "64l3n8nar836i5j",
-        "nbChambres": 4,
-        "nbSdb": 2,
-        "nomMaison": "Beverly Springfield",
-        "prix": 2700,
-        "surface": 45,
-        "imgUrl": "image1.png"
-    },
-    {
-        "adresse": "2699 Green Valley, Highland Lake",
-        "favori": true,
-        "id": "lo831zeg10hpm9y",
-        "nbChambres": 4,
-        "nbSdb": 2,
-        "nomMaison": "Palm Harbor",
-        "prix": 2095,
-        "surface": 42,
-        "imgUrl": "image2.png"
-    },
-    {
-        "adresse": "909 Woodland St, Michigan, IN",
-        "favori": false,
-        "id": "s1zuhj19x8eb242",
-        "nbChambres": 4,
-        "nbSdb": 3,
-        "nomMaison": "Faulkner Ave",
-        "prix": 4550,
-        "surface": 80,
-        "imgUrl": "image3.png"
-    }
-];
+// 1. Importation de la fonction getOffres depuis ton fichier backend
+import { getOffres } from '../js/backend.mjs';
+
+// 2. Appel de la fonction pour récupérer les vraies données de PocketBase
+const offres = await getOffres();
 ---
 
-<!doctype html>
-<html lang="en">
+<html lang="fr">
     <head>
-        <meta charset="UTF-8" />
-        <meta name="viewport" content="width=device-width" />
-        <title>Accueil</title>
+		<meta charset="UTF-8" /> <meta name="viewport" content="width=device-width" />
+        <title>Nos Offres</title>
     </head>
     <body>
-        <h1>Page des offres</h1>
+        <h1 class="text-2xl font-bold p-4">Page des offres</h1>
+        
+        <button id="favori-button" class="bg-blue-500 text-white p-2 m-4 rounded">
+            Afficher les Favoris
+        </button>
 
-        <div>
-            {offres.map((offre) => (
-                /* On appelle ici le composant pour chaque offre */
-                <OffreCard {...offre} />
-            ))}
-        </div>
+        <div id="offres-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 p-4">
+    		{offres.map((offre) => (
+        		<OffreCard {...offre} />
+    		))}
+		</div>
+
+        <script>
+            const button = document.getElementById('favori-button');
+            let showOnlyFavorites = false;
+
+            button.addEventListener('click', () => {
+                showOnlyFavorites = !showOnlyFavorites;
+                // Sélection de tous les éléments ayant la classe .offre
+                const cartes = document.querySelectorAll('.offre');
+
+                cartes.forEach((carte) => {
+                    // Vérification de l'attribut data-favori
+                    const isFavori = carte.getAttribute('data-favori') === 'true';
+                    
+                    // On caste en HTMLElement pour éviter les erreurs si tu es en mode strict
+                    const element = carte as HTMLElement;
+
+                    if (showOnlyFavorites) {
+                        element.style.display = isFavori ? 'block' : 'none';
+                        button.textContent = 'Afficher tout';
+                    } else {
+                        element.style.display = 'block';
+                        button.textContent = 'Afficher les Favoris';
+                    }
+                });
+            });
+        </script>
     </body>
 </html>

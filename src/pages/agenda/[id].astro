@@ -1,0 +1,16 @@
+---
+import { getOneEvent } from "../js/backend.mjs";
+
+// 1. On récupère l'ID depuis l'URL
+const { id } = Astro.params;
+
+// 2. On appelle notre nouvelle fonction
+const event = await getOneEvent(id);
+
+// 3. Si l'événement n'existe pas, on redirige vers l'agenda (étape suivante du TD)
+if (!event) {
+    return Astro.redirect("/agenda");
+}
+---
+
+<h1>{event.titre}</h1>

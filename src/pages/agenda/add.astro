@@ -1,0 +1,50 @@
+---
+import Layout from "../../layouts/Layout.astro";
+let pbMessage = ""; // Initialisation de la variable pour stocker le message de retour
+
+if (Astro.request.method === "POST") { // Vérifie si la méthode de la requête est POST
+    const data = await Astro.request.formData(); // Récupère les données du formulaire de la requête
+    console.log(data); // Affiche les données du formulaire dans la console
+
+    const eventDate = new Date(data.get("date")?.toString() || new Date()); // Convertit la date du formulaire en objet Date, ou utilise la date actuelle si non spécifiée
+
+    if (eventDate < new Date()) { // Vérifie si la date de l'événement est dans le passé
+        pbMessage = "La d doit être dans le futur"; // Définit le message d'erreur si la date est dans le passé
+    } else {
+        const resp = await addEvent(data); // Appelle la fonction addEvent avec les données du formulaire et attend la réponse
+        pbMessage = resp.message; // Définit le message de retour avec le message de la réponse
+    }
+}
+<p>{pbMessage}</p>
+--
+
+<Layout title="Ajouter un événement">
+    <h1 class="text-3xl">Ajouter un événement</h1>
+    <form class="flex flex-col p-4">
+        <input type="text" name="title" placeholder="Titre" class="border my-4 p-2 rounded-md" />
+        <select name="categorie" class="border my-4 p-2">
+            <option value="Théâtre">Théâtre</option>
+            <option value="Musique">Musique</option>
+        </select>
+        <input type="text" name="excerpt" placeholder="Extrait" class="border my-4 p-2 rounded-md" />
+        <select name="lieu" class="border my-4 p-2">
+            <option value="Théâtre">Théâtre</option>
+            <option value="Conservatoire">Conservatoire</option>
+        </select>
+        <textarea name="description" placeholder="Description" class="border my-4 p-2 rounded-md"></textarea>
+        <input type="date" name="date" class="border my-4 p-2 rounded-md" />
+        <input type="file" name="imgUrl" class="border my-4 p-2 rounded-md" />
+        <input type="submit" value="Ajouter" class="bg-slate-500 rounded-lg p-5" />
+        </select>
+        class="flex flex-col p-4"
+        action="/agenda/add" 
+        method="post"  
+        enctype="multipart/form-data"
+        >
+        <!--
+        action="/agenda/add"
+        method="post"
+        enctype="multipart/form-data"
+        -->
+    </form>
+</Layout>

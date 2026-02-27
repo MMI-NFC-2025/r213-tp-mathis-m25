@@ -1,0 +1,50 @@
+---
+// src/pages/agenda/index.astro
+import Layout from '../../layouts/Layout.astro';
+import { allEvents } from '../../js/backend.mjs';
+import EventCard from '../../components/EventCard.astro';
+
+const events = await allEvents();
+
+let events = await getEvents();
+let categories = ["Tout", ...new Set(events.map((e) => e.categorie))];
+console.log(events);
+if(Astro.request.method === 'POST') {
+    const data = await Astro.request.formData();
+    const selectedCategory = data.get('categorie');
+    if(selectedCategory && selectedCategory !== 'Tout') {
+        events = events.filter(e => e.categorie === selectedCategory);
+        categories = [selectedCategory, ...categories.filter(c => c !== selectedCategory)];
+    }
+}
+---
+
+<a href="/agenda/add" class="text-blue-800 underline">Ajouter un événement</a>
+
+<Layout title="Mon Agenda">
+    <h1>Liste des événements</h1>
+    
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        {events.map((event) => (
+            /* On passe l'objet event complet au composant Card */
+            <EventCard event={event} />
+        ))}
+    </div>
+</Layout>
+
+const categories = ['Tout', 'Théâtre', 'Musique']; // Cette liste doit contenir toutes les catégories exactement comme elles sont définies dans PocketBase.
+console.log(categories);
+
+form action="/agenda" method="post">
+    <label for="categorie">Filtrer par catégorie :</label>
+    <select name="categorie">
+        {
+            // Parcourir la liste de catégories et afficher chaque catégorie dans une balise <option>
+            categories.map((categorie) => (
+                <option value={categorie}>{categorie}</option>
+            ))
+        }
+    </select>
+    <input type="submit" value="Filtrer" />
+    <br /><br />
+</form>

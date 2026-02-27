@@ -1,12 +1,32 @@
 ---
-// Récupération des propriétés passées par le spread {...offre}
-const { nomMaison, prix, adresse, favori } = Astro.props;
+// Importe le composant que tu as créé au début du TP
+import PbImage from './PbImage.astro';
+
+// On récupère les propriétés. 
+// Note : avec PocketBase, le champ s'appellera probablement "image" (selon ton schéma de base)
+const { nomMaison, prix, adresse, favori, image, surface, nbChambres, nbSdb } = Astro.props;
+const { ouhfpnd1w6vw4de } = Astro.params;
 ---
 
-<div class="offre" data-favori={favori.toString()}>
-    <h3>{nomMaison}</h3>
-    <ul>
-        <li>Prix : {prix}€</li>
-        <li>Adresse : {adresse}</li>
-    </ul>
+<div class="offre border p-0 mb-6 rounded-xl shadow-lg overflow-hidden bg-white" data-favori={favori.toString()}>
+    <PbImage record={Astro.props} imageField={image} width={600} height={400} />
+    
+    <div class="p-4">
+        <h3 class="font-bold text-xl text-blue-900">{nomMaison}</h3>
+        
+        <p class="text-sm text-gray-500 mb-2">
+            {surface} m² | {nbChambres} ch. | {nbSdb} sdb.
+        </p>
+        
+        <div class="flex flex-col gap-1">
+            <span class="text-lg font-semibold text-green-600">{prix} € / mois</span>
+            <span class="text-sm text-gray-400 italic">{adresse}</span>
+        </div>
+
+        {favori && (
+            <span class="inline-block mt-3 px-2 py-1 bg-yellow-100 text-yellow-700 text-xs font-bold rounded">
+                ★ Favori
+            </span>
+        )}
+    </div>
 </div>

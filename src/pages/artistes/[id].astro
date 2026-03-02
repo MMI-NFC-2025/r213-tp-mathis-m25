@@ -1,0 +1,26 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import { getOneArtist, getEventsByArtist } from '../../backend.mjs'; // Fonctions supposées existantes
+
+const { id } = Astro.params;
+const artist = await getOneArtist(id); // Récupère les infos de l'artiste
+
+// Si l'artiste n'existe pas, redirection
+if (!artist) return Astro.redirect('/artistes');
+
+// On suppose que cette fonction filtre les événements par l'ID de l'artiste
+const events = await getEventsByArtist(id); 
+---
+
+<Layout title={`Événements de ${artist.first_name}`}>
+    <h1>Événements pour {artist.first_name} {artist.last_name}</h1>
+    {events.length > 0 ? (
+        <ul>
+            {events.map(event => (
+                <li>{event.title} - {event.formattedDate}</li>
+            ))}
+        </ul>
+    ) : (
+        <p>Aucun événement prévu pour cet artiste.</p>
+    )}
+</Layout>

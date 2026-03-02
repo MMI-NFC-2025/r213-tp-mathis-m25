@@ -1,0 +1,69 @@
+---
+import Layout from '../../../layouts/Layout.astro';
+import { getOneEvent, allArtists, updateEvent } from '../../../backend.mjs';
+
+const { id } = Astro.params;
+let event = await getOneEvent(id);
+const artists = await allArtists();
+let pbMessage = "";
+
+// Sécurité : si l'événement n'existe pas
+if (!event) {
+    console.error(`Event with id ${id} not found`);
+    return Astro.redirect("/agenda");
+}
+
+// Traitement du formulaire au clic sur "Modifier"
+if (Astro.request.method == "POST") {
+    const data = await Astro.request.formData();
+    
+    // Validation de la date
+    if (new Date(data.get("date")?.toString() || 0) < new Date()) {
+        pbMessage = "La date de l'événement doit être supérieure à la date d'aujourd'hui";
+    } else {
+        const response = await updateEvent(event.id, data);
+        if (response.success) {
+            event = response.event; // On met à jour l'objet event pour l'affichage
+            pbMessage = response.message;
+        } else {
+            pbMessage = response.message;
+        }
+    }
+}
+---
+
+<Layout title="Modifier l'événement">
+    <div class="max-w-xl mx-auto p-6">
+        <h1 class="text-xl font-bold">Modifier : {event.title}</h1>
+        
+        {pbMessage && <div class="bg-blue-100 p-3 my-4">{pbMessage}</div>}
+
+        <form method="POST" enctype="multipart/form-data" class="flex flex-col gap-4">
+            <label>Titre de l'événement</label>
+            <input type="text" name="title" value={event.title} class="border p-2 rounded" required/>
+
+            <label>Date</label>
+            <input type="datetime-local" name="date" value={event.date.slice(0, 16)} class="border p-2 rounded" required/>
+
+            <label>Artiste</label>
+            <select name="artist" class="border my-4 p-2">
+                {artists?.map((artist) => (
+                    <option value={artist.id} selected={event.artist === artist.id}>
+                        {artist.first_name} {artist.last_name}
+                    </option>
+                ))}
+            </select>
+
+            <button type="submit" class="bg-blue-600 text-white p-2 rounded mt-4">
+                Enregistrer les modifications
+            </button>
+        </form>
+    </div>
+</Layout>
+
+<input 
+    type="datetime-local" 
+    name="date" 
+    value={event.date ? new Date(event.date).toISOString().slice(0, 16) : ""} 
+    class="border p-2"
+/>

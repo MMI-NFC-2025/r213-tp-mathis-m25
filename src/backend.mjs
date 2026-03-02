@@ -58,3 +58,48 @@ export async function addOffre(house) {
         };
     }
 }
+
+export async function getEventsByArtist(id) {
+    try {
+        const events = await pb.collection("events").getFullList({
+            filter: `artist = "${id}"`,
+        });
+
+        events.forEach(event => {
+            event.img = pb.files.getURL(event, event.imgUrl);
+        });
+
+        return events;
+    } catch (error) {
+        console.error("Erreur getEventsByArtist :", error);
+        return [];
+    }
+}
+
+export async function allArtists() {
+    try {
+        return await pb.collection("artiste_conservatoire").getFullList();
+    } catch (error) {
+        console.error("error allArtists: ", error);
+        return [];
+    }
+}
+
+export async function updateEvent(id, data) {
+    try {
+        const record = await pb.collection("evenement").update(id, data);
+        return { success: true, event: record, message: "Modifié avec succès !" };
+    } catch (error) {
+        return { success: false, event: null, message: "Erreur : " + error.message };
+    }
+}
+
+export async function getOneArtist(id) {
+    try {
+        const artist = await pb.collection("artiste_conservatoire").getOne(id);
+        return artist;
+    } catch (error) {
+        console.error("Erreur getOneArtist :", error);
+        return null;
+    }
+}

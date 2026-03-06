@@ -1,12 +1,3 @@
---
-let message = '';
-if (Astro.request.method === "POST") {
-    const formData = await Astro.request.formData();
-    const response = await addOffre(formData);
-    message = response.message;
-}
---
-
 import PocketBase from 'pocketbase';
 
 const db = new PocketBase("http://127.0.0.1:8090");
@@ -35,7 +26,7 @@ export async function getImageUrl(record, filename) {
 
 export async function getOneEvent(ouhfpnd1w6vw4de) {
     try {
-        const event = await pb.collection('evenement').getOne(ouhfpnd1w6vw4de);
+        const event = await db.collection('evenement').getOne(ouhfpnd1w6vw4de);
         return event;
     } catch (error) {
         console.error("Erreur lors de la récupération de l'événement :", error);
@@ -61,12 +52,12 @@ export async function addOffre(house) {
 
 export async function getEventsByArtist(id) {
     try {
-        const events = await pb.collection("events").getFullList({
+        const events = await db.collection("events").getFullList({
             filter: `artist = "${id}"`,
         });
 
         events.forEach(event => {
-            event.img = pb.files.getURL(event, event.imgUrl);
+            event.img = db.files.getUrl(event, event.imgUrl);
         });
 
         return events;
@@ -78,7 +69,7 @@ export async function getEventsByArtist(id) {
 
 export async function allArtists() {
     try {
-        return await pb.collection("artiste_conservatoire").getFullList();
+        return await db.collection("artiste_conservatoire").getFullList();
     } catch (error) {
         console.error("error allArtists: ", error);
         return [];
@@ -87,7 +78,7 @@ export async function allArtists() {
 
 export async function updateEvent(id, data) {
     try {
-        const record = await pb.collection("evenement").update(id, data);
+        const record = await db.collection("evenement").update(id, data);
         return { success: true, event: record, message: "Modifié avec succès !" };
     } catch (error) {
         return { success: false, event: null, message: "Erreur : " + error.message };
@@ -96,10 +87,63 @@ export async function updateEvent(id, data) {
 
 export async function getOneArtist(id) {
     try {
-        const artist = await pb.collection("artiste_conservatoire").getOne(id);
+        const artist = await db.collection("artiste_conservatoire").getOne(id);
         return artist;
     } catch (error) {
         console.error("Erreur getOneArtist :", error);
         return null;
+    }
+}
+
+export async function getAgent(id) {
+    try {
+        return await db.collection('agent').getOne(id);
+    } catch (error) {
+        return null;
+    }
+}
+
+export async function getOffresByAgent(agentId) {
+    try {
+        return await db.collection('maison').getFullList({
+            filter: `agent = "${agentId}"`,
+        });
+    } catch (error) {
+        return [];
+    }
+}
+
+export async function getOffresByAgentId(id) {
+    try {
+        let data = await db.collection('maison').getFullList({
+            filter: `agent = "${id}"`,
+        });
+
+        data = data.map((maison) => {
+            maison.imageUrl = db.files.getUrl(maison, maison.image);
+            return maison;
+        });
+
+        return data;
+    } catch (error) {
+        console.error("Erreur getOffresByAgentId :", error);
+        return [];
+    }
+}
+
+export async function allAgents() {
+    try {
+        return await db.collection('agent').getFullList();
+    } catch (error) {
+        console.error("Erreur allAgents : ", error);
+        return [];
+    }
+}
+
+export async function setFavori(house) {
+    try {
+        await db.collection('maison').update(house.id, {favori: !house.favori});
+    } catch (error) {
+        console.error("Erreur setFavori :", error);
     }
 }

@@ -1,0 +1,37 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import Card from '../../components/Card.astro';
+import { allAgents, getOffresByAgentId } from '../../backend.js';
+
+// 1. Générer les chemins pour chaque agent
+export async function getStaticPaths() {
+    const agents = await allAgents();
+    return agents.map((agent) => ({
+        params: { id: agent.id }, // L'id correspond au nom du fichier [id].astro
+        props: { agent },         // On passe l'objet agent en props
+    }));
+}
+
+// 2. Récupérer les données de l'agent et ses offres
+const { id } = Astro.params;
+const { agent } = Astro.props;
+const offres = await getOffresByAgentId(id);
+---
+
+<Layout title={`Offres de ${agent.nom}`}>
+    <div class="mb-8">
+        <a href="/agents" class="text-sm text-gray-500">← Retour à la liste</a>
+        <h1 class="text-3xl font-bold mt-4">Offres de {agent.prenom} {agent.nom}</h1>
+        <p class="text-gray-600 italic">Contact : {agent.email}</p>
+    </div>
+
+    {offres.length > 0 ? (
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {offres.map((offre) => (
+                <Card {...offre} /> 
+            ))}
+        </div>
+    ) : (
+        <p class="bg-yellow-100 p-4 rounded">Cet agent n'a aucune offre disponible pour le moment.</p>
+    )}
+</Layout>

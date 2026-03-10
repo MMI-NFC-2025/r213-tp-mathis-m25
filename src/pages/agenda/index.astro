@@ -1,50 +1,79 @@
 ---
-// src/pages/agenda/index.astro
-import Layout from '../../layouts/Layout.astro';
-import { allEvents } from '../../js/backend.mjs';
-import EventCard from '../../components/EventCard.astro';
+import Layout from '../layouts/Layout.astro';
+import EventCard from '../components/EventCard.astro';
+import Card from '../components/card.astro'; // Composant pour les maisons
+import { allEvents, getOffres } from '../js/backend.mjs';
 
-const events = await allEvents();
+// 1. Gestion des maisons (Favoris)
+const toutesLesOffres = await getOffres();
+const favoris = toutesLesOffres.filter(o => o.favori);
 
-let events = await getEvents();
+// 2. Gestion de l'agenda (Filtres)
+let events = await allEvents();
 let categories = ["Tout", ...new Set(events.map((e) => e.categorie))];
-console.log(events);
-if(Astro.request.method === 'POST') {
+
+if (Astro.request.method === 'POST') {
     const data = await Astro.request.formData();
     const selectedCategory = data.get('categorie');
-    if(selectedCategory && selectedCategory !== 'Tout') {
+    if (selectedCategory && selectedCategory !== 'Tout') {
         events = events.filter(e => e.categorie === selectedCategory);
         categories = [selectedCategory, ...categories.filter(c => c !== selectedCategory)];
     }
 }
 ---
 
-<a href="/agenda/add" class="text-blue-800 underline">Ajouter un événement</a>
-
-<Layout title="Mon Agenda">
-    <h1>Liste des événements</h1>
+<Layout title="Accueil - Mon Site">
     
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-        {events.map((event) => (
-            /* On passe l'objet event complet au composant Card */
-            <EventCard event={event} />
-        ))}
-    </div>
+    <section class="mb-12">
+        <h2 class="text-2xl font-bold mb-4">Mes Maisons Coups de Cœur</h2>
+        {favoris.length > 0 ? (
+            <div class="flex overflow-x-auto gap-6 pb-4 scrollbar-hide">
+                {favoris.map((offre) => (
+                    <div class="min-w-[300px]">
+                        <Card offre={offre} />
+                    </div>
+                ))}
+            </div>
+        ) : (
+            <p class="text-gray-500 italic">Aucune maison favorite pour le moment.</p>
+        )}
+    </section>
+
+    <hr class="my-8" />
+
+    <section shadow-sm p-6 rounded-lg>
+        <div class="flex justify-between items-center mb-6">
+            <h1 class="text-2xl font-bold">Liste des événements</h1>
+            <a href="/agenda/add" class="text-blue-600 hover:underline"> + Ajouter un événement</a>
+        </div>
+
+        <form action="/" method="post" class="mb-8 p-4 bg-gray-50 rounded-lg flex items-center gap-4">
+            <label for="categorie" class="font-medium">Filtrer par catégorie :</label>
+            <select name="categorie" class="border rounded px-3 py-1">
+                {categories.map((categorie) => (
+                    <option value={categorie}>{categorie}</option>
+                ))}
+            </select>
+            <button type="submit" class="bg-blue-600 text-white px-4 py-1 rounded hover:bg-blue-700 transition">
+                Filtrer
+            </button>
+        </form>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {events.map((event) => (
+                <EventCard event={event} />
+            ))}
+        </div>
+    </section>
+
 </Layout>
 
-const categories = ['Tout', 'Théâtre', 'Musique']; // Cette liste doit contenir toutes les catégories exactement comme elles sont définies dans PocketBase.
-console.log(categories);
-
-form action="/agenda" method="post">
-    <label for="categorie">Filtrer par catégorie :</label>
-    <select name="categorie">
-        {
-            // Parcourir la liste de catégories et afficher chaque catégorie dans une balise <option>
-            categories.map((categorie) => (
-                <option value={categorie}>{categorie}</option>
-            ))
-        }
-    </select>
-    <input type="submit" value="Filtrer" />
-    <br /><br />
-</form>
+<style>
+    .scrollbar-hide::-webkit-scrollbar {
+        display: none;
+    }
+    .scrollbar-hide {
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+    }
+</style>

@@ -1,0 +1,45 @@
+---
+const { offre } = Astro.props; // On récupère l'objet offre passé par le parent
+---
+
+<div class="relative border rounded-lg p-4">
+    <img src={offre.imageUrl} alt={offre.nom} class="w-full h-48 object-cover rounded" />
+    <h3 class="text-lg font-bold mt-2">{offre.nom}</h3>
+    
+    <button 
+        class="favoriteButton absolute bottom-2 left-2 p-2 bg-black/50 rounded-full" 
+        data-offre={JSON.stringify(offre)}
+    >
+        <img 
+            id="favorite-icon" 
+            src={offre.favori ? "/favorite_filled.png" : "/favorite.png"} 
+            alt="Favorite Icon" 
+            class="w-6 h-6" 
+        />
+    </button>
+</div>
+
+<script>
+    //@ts-nocheck
+    import { setFavori } from "../../backend.mjs";
+
+    const favoriteButtons = document.querySelectorAll(".favoriteButton");
+
+    favoriteButtons.forEach(button => {
+        button.addEventListener('click', async () => {
+            const offreData = JSON.parse(button.dataset.offre || '{}');
+            
+            const newFavori = !offreData.favori;
+
+            await setFavori(offreData);
+
+            const favIcon = button.querySelector('#favorite-icon');
+            if (favIcon) {
+                favIcon.src = newFavori ? "/favorite_filled.png" : "/favorite.png";
+            }
+
+            offreData.favori = newFavori;
+            button.dataset.offre = JSON.stringify(offreData);
+        });
+    });
+</script>
